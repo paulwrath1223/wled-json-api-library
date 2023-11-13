@@ -7,35 +7,49 @@ use crate::errors::WledJsonApiError;
 #[serde(rename_all = "camelCase")]
 pub struct State {
     /// On/Off state of the light
-    pub on: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub on: Option<bool>,
 
     /// Brightness of the light. If on is false, contains last brightness when light was on (aka brightness when on is set to true. Setting bri to 0 is supported but it is recommended to use the range 1-255 and use on: false to turn off. The state response will never have the value 0 for bri.
-    pub bri: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub bri: Option<u8>,
 
     /// Duration of the crossfade between different colors/brightness levels. One unit is 100ms, so a value of 4 results in a transition of 400ms.
-    pub transition: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub transition: Option<u8>,
 
     /// Similar to transition, but applies to just the current API call. Not included in state response.
-    #[serde(default = "none_function")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub tt: Option<u8>,
 
     /// -1 to 65535; ID of currently set preset. 1~17~ can be used to iterate through presets 1-17.
-    pub ps: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ps: Option<i32>,
 
     /// 1 to 16 (250 in 0.11); Save current light config to specified preset slot. Not included in state response.
-    #[serde(default = "none_function")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub psave: Option<u8>,
 
     /// -1 to 0; 	ID of currently set playlist. For now, this sets the preset cycle feature, -1 is off and 0 is on.
-    pub pl: i8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pl: Option<i8>,
 
     /// Night light
-    pub nl: Nl,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub nl: Option<Nl>,
 
     /// UDP sync
-    pub udpn: Udpn,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub udpn: Option<Udpn>,
 
     /// If set to true in a JSON POST command, the response will contain the full JSON state object. Not included in state response
     #[serde(default)]
