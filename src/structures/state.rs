@@ -1,6 +1,7 @@
 use serde;
 use serde::{Serialize, Deserialize};
 use crate::errors::WledJsonApiError;
+use crate::structures::none_function;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -52,35 +53,44 @@ pub struct State {
     pub udpn: Option<Udpn>,
 
     /// If set to true in a JSON POST command, the response will contain the full JSON state object. Not included in state response
-    #[serde(default)]
-    pub v: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub v: Option<bool>,
 
     /// If set to true, device will reboot immediately. Not included in state response.
-    #[serde(default)]
-    pub rb: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rb: Option<bool>,
 
     /// If set to true, enters realtime mode and blanks the LEDs. The realtime timeout option does not have an effect when this command is used, WLED will stay in realtime mode until the state (color/effect/segments, excluding brightness) is changed. It is expected that {"live":false} is sent once live data sending is terminated. Not included in state response.
-    #[serde(default)]
-    pub live: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub live: Option<bool>,
 
     /// 0, 1, or 2; Live data override. 0 is off, 1 is override until live data ends, 2 is override until ESP reboot (available since 0.10.0)
-    #[serde(default)]
-    pub lor: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub lor: Option<u8>,
 
     /// Set module time to unix timestamp. Not included in state response.
-    #[serde(default)]
-    pub time: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub time: Option<u32>,
 
     /// 0 to info.leds.maxseg-1; Main Segment
-    #[serde(default)]
-    pub mainseg: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mainseg: Option<u8>,
 
     /// Custom preset playlists. Not included in state response (available since 0.11.0)
-    #[serde(default)]
-    pub playlist: Playlist,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub playlist: Option<Playlist>,
 
     /// Array of segment objects; Segments are individual parts of the LED strip. In 0.9.0 this will enables running different effects on differentparts of the strip.
-    pub seg: Vec<Seg>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub seg: Option<Vec<Seg>>,
 }
 
 
@@ -104,24 +114,34 @@ impl TryFrom<&str> for State{
 #[serde(rename_all = "camelCase")]
 pub struct Nl {
     /// Nightlight currently active
-    pub on: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub on: Option<bool>,
 
     /// Duration of nightlight in minutes
-    pub dur: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub dur: Option<u8>,
 
     /// If true, the light will gradually dim over the course of the nightlight duration. If false, it will instantly turn to the target brightness once the duration has elapsed. Removed in 0.13.0 (use mode instead)
-    #[serde(default)]
-    pub fade: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub fade: Option<bool>,
 
     /// 0 to 3; Nightlight mode (0: instant, 1: fade, 2: color fade, 3: sunrise) (available since 0.10.2)
-    pub mode: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mode: Option<u8>,
 
     /// Target brightness of nightlight feature
-    pub tbri: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub tbri: Option<u8>,
 
     /// -1 to 15300; Remaining nightlight duration in seconds, -1 if not active. Only in state response, can not be set.
     #[serde(skip_serializing)]
-    pub rem: i16,
+    #[serde(default = "none_function")]
+    pub rem: Option<i16>,
 }
 
 impl TryInto<String> for Nl{
@@ -137,20 +157,29 @@ impl TryInto<String> for Nl{
 pub struct Udpn {
 
     /// Send WLED broadcast (UDP sync) packet on state change
-    pub send: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub send: Option<bool>,
 
     /// Receive broadcast packets
-    pub recv: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub recv: Option<bool>,
 
     /// Bitfield for broadcast send groups 1-8
-    pub sgrp: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sgrp: Option<u8>,
 
     /// Bitfield for broadcast receive groups 1-8
-    pub rgrp: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rgrp: Option<u8>,
 
     /// Don't send a broadcast packet (applies to just the current API call). Not included in state response.
-    #[serde(default)]
-    pub nn: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub nn: Option<bool>,
 }
 
 impl TryInto<String> for Udpn{
@@ -164,108 +193,173 @@ impl TryInto<String> for Udpn{
 #[serde(rename_all = "camelCase")]
 pub struct Seg {
     /// -1 to info.maxseg -1; Zero-indexed ID of the segment. May be omitted, in that case the ID will be inferred from the order of the segment objects in the seg array. -1 means apply to all selected segments
-    pub id: i16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub id: Option<i16>,
 
     /// 0 to info.leds.count -1; LED the segment starts at.
-    pub start: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub start: Option<u16>,
 
     /// 0 to info.leds.count; LED the segment stops at, not included in range. If stop is set to a lower or equal value than start (setting to 0 is recommended), the segment is invalidated and deleted.
-    pub stop: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub stop: Option<u16>,
 
     /// 0 to info.leds.count; Length of the segment (stop - start). stop has preference, so if it is included, len is ignored.
     #[serde(skip_serializing)] // this feild is ignored if stop is sent, so don't risk sending bad shit
-    pub len: u16,
+    #[serde(default = "none_function")]
+    pub len: Option<u16>,
 
     /// Grouping (how many consecutive LEDs of the same segment will be grouped to the same color)
-    pub grp: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub grp: Option<u8>,
 
     /// Spacing (how many LEDs are turned off and skipped between each group)
-    pub spc: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub spc: Option<u8>,
 
     /// -len+1 to len; 	Offset (how many LEDs to rotate the virtual start of the segments, available since 0.13.0)
-    pub of: i16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub of: Option<i16>,
 
     /// Turns on and off the individual segment. (available since 0.10.0)
-    pub on: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub on: Option<bool>,
 
     /// freezes/unfreezes the current effect
-    pub frz: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub frz: Option<bool>,
 
     /// Sets the individual segment brightness (available since 0.10.0)
-    pub bri: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub bri: Option<u8>,
 
     /// 0 to 255 or 1900 to 10091; White spectrum color temperature (available since 0.13.0)
-    pub cct: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub cct: Option<u16>,
 
     /// Undocumented?????? TODO
-    pub set: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub set: Option<i64>,
 
     /// Array that has up to 3 color arrays as elements, the primary, secondary (background) and tertiary colors of the segment. Each color is an array of 3 or 4 bytes, which represent an RGB(W) color.
-    pub col: Vec<Vec<u8>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub col: Option<Vec<Vec<u8>>>,
 
     /// 0 to info.fxcount -1; ID of the effect or ~ to increment, ~- to decrement, or r for random.
-    pub fx: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub fx: Option<u16>,
 
     /// Relative effect speed. ~ to increment, ~- to decrement. ~10 to increment by 10, ~-10 to decrement by 10.
-    pub sx: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sx: Option<u8>,
 
     /// Effect intensity. ~ to increment, ~- to decrement. ~10 to increment by 10, ~-10 to decrement by 10.
-    pub ix: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ix: Option<u8>,
 
     /// 0 to info.palcount -1; ID of the color palette or ~ to increment, ~- to decrement, or r for random.
-    pub pal: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pal: Option<u16>,
 
     /// Effect custom slider 1. Custom sliders are hidden or displayed and labeled based on effect metadata.
-    pub c1: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub c1: Option<u8>,
 
     /// Effect custom slider 2.
-    pub c2: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub c2: Option<u8>,
 
     /// 0 to 31; Effect custom slider 3.
-    pub c3: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub c3: Option<u8>,
 
     /// true if the segment is selected. Selected segments will have their state (color/FX) updated by APIs that don't support segments (e.g. UDP sync, HTTP API). If no segment is selected, the first segment (id:0) will behave as if selected. WLED will report the state of the first (lowest id) segment that is selected to APIs (HTTP, MQTT, Blynk...), or mainseg in case no segment is selected and for the UDP API. Live data is always applied to all LEDs regardless of segment configuration.
-    pub sel: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sel: Option<bool>,
 
     /// Flips the segment, causing animations to change direction.
-    pub rev: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rev: Option<bool>,
 
     /// Mirrors the segment (available since 0.10.2)
-    pub mi: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mi: Option<bool>,
 
     /// Effect option 1. Custom options are hidden or displayed and labeled based on effect metadata.
-    pub o1: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub o1: Option<bool>,
 
     /// Effect option 2.
-    pub o2: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub o2: Option<bool>,
 
     /// Effect option 3.
-    pub o3: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub o3: Option<bool>,
 
     /// 0 to 3; Setting of the sound simulation type for audio enhanced effects. (0: 'BeatSin', 1: 'WeWillRockYou', 2: '10_3', 3: '14_3') (as of 0.14.0-b1, there are these 4 types defined)
-    pub si: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub si: Option<u8>,
 
     /// 0 to 4 [map1D2D.count]; Setting of segment field 'Expand 1D FX'. (0: Pixels, 1: Bar, 2: Arc, 3: Corner)
-    pub m12: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub m12: Option<u8>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Playlist {
     /// Array of preset ID integers to be applied in this order.
-    pub ps: Vec<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ps: Option<Vec<u8>>,
 
     /// Array of time each preset should be kept, in tenths of seconds. If only one integer is supplied, all presets will be kept for that time.Defaults to 10 seconds if not provided.
-    pub dur: Vec<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub dur: Option<Vec<u32>>,
 
     /// Array of time each preset should transition to the next one, in tenths of seconds. If only one integer is supplied, all presets will transition for that time. Defaults to the current transition time if not provided.
-    pub transition: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub transition: Option<u8>,
 
     /// How many times the entire playlist should cycle before finishing. Set to 0 for an indefinite cycle. Default to indefinite if not provided.
-    pub repeat: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub repeat: Option<u16>,
 
     /// Single preset ID to apply after the playlist finished. Has no effect when an indefinite cycle is set. If not provided, the light will stay on the last preset of the playlist.
-    pub end: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub end: Option<u8>,
 }
 
 impl TryInto<String> for Playlist{
@@ -284,9 +378,7 @@ where T: serde::Serialize
     Ok(out)
 }
 
-pub fn none_function<T>() -> Option<T>{
-    None
-}
+
 
 
 #[cfg(test)]

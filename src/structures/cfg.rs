@@ -1,14 +1,30 @@
 use serde;
 use serde::{Serialize, Deserialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::errors::WledJsonApiError;
+use crate::structures::none_function;
+
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cfg {
-    pub rev: Vec<i64>,
-    pub vid: i64,
-    pub id: Id,
+    /// Version of WLED ("1.0.2", for example is [1, 0, 2])
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rev: Option<Vec<u32>>,
+
+    /// Version ID; version code in format yymmddb (b = daily build) (macro called "VERSION" in wled source)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub vid: Option<u64>,
+
+    /// identifying information
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub id: Option<Id>,
+
     pub nw: Nw,
+    pub eth: Eth, //TODO
     pub ap: Ap,
     pub wifi: Wifi,
     pub hw: Hw,
@@ -35,55 +51,150 @@ impl TryFrom<&str> for Cfg{
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Id {
-    pub mdns: String,
-    pub name: String,
-    pub inv: String,
+    ///mDNS address (*.local, replaced by wledXXXXXX if default is used)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mdns: Option<String>,
+
+    /// Server Description; Name of module - use default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub name: Option<String>,
+
+    /// Alexa invocation name; speech control name of device. Choose something voice-to-text can understand
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub inv: Option<String>,
+
+    /// Simplified UI;
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sui: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Nw {
-    pub ins: Vec<In>,
+    /// honestly no idea why this is a vector, WLED source only uses one element
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ins: Option<Vec<In>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct In {
-    pub ssid: String,
-    pub pskl: i64,
-    pub ip: Vec<i64>,
-    pub gw: Vec<i64>,
-    pub sn: Vec<i64>,
+    /// SSID of the network to connect to
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ssid: Option<String>,
+
+    /// Length of the wifi password
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pskl: Option<usize>,
+
+    /// static IP of ESP
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ip: Option<[u8; 4]>,
+
+    /// gateway (router) IP
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub gw: Option<[u8; 4]>,
+
+    /// most common subnet in home networks is 255:255:255:0
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sn: Option<[u8; 4]>,
 }
 
+/// Information about the access point that the ESP hosts when enabled, or when connecting to other AP fails
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ap {
-    pub ssid: String,
-    pub pskl: i64,
-    pub chan: i64,
-    pub hide: i64,
-    pub behav: i64,
-    pub ip: Vec<i64>,
+    /// SSID of local AP
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ssid: Option<String>,
+
+    /// Length of AP password (password is wled1234 by default if I remember correctly)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pskl: Option<usize>,
+
+    /// 2.4GHz WiFi AP channel (1-13)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub chan: Option<u8>,
+
+    /// hidden AP SSID, no idea why this is a byte but it is
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub hide: Option<u8>,
+
+    /// access point opens when no connection after boot by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub behav: Option<ApBehaviourEnum>,
+
+    /// IP to host the website when on AP (default 4.3.2.1)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ip: Option<[u8; 4]>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Wifi {
-    pub sleep: bool,
+
+    /// IDFK you're on your own
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sleep: Option<bool>,
 }
 
+/// Hardware info
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Hw {
-    pub led: Led,
-    pub com: Vec<ColorOrderMap>,
-    pub btn: Btn,
-    pub ir: Ir,
-    pub relay: Relay,
-    pub baud: i64,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub led: Option<Led>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub com: Option<Vec<ColorOrderMap>>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub btn: Option<Btn>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ir: Option<Ir>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub relay: Option<Relay>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub baud: Option<i64>,
+
+    ///
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "if")]
-    pub if_field: If,
+    pub if_field: Option<If>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -444,4 +555,48 @@ pub struct MonthDay {
     pub day: u8,
 }
 
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Eth {
+    // TODO; wled source below
+
+
+    /*
+  JsonObject ethernet = doc.createNestedObject("eth");
+  ethernet["type"] = ethernetType;
+  if (ethernetType != WLED_ETH_NONE && ethernetType < WLED_NUM_ETH_TYPES) {
+    JsonArray pins = ethernet.createNestedArray("pin");
+    for (uint8_t p=0; p<WLED_ETH_RSVD_PINS_COUNT; p++) pins.add(esp32_nonconfigurable_ethernet_pins[p].pin);
+    if (ethernetBoards[ethernetType].eth_power>=0)     pins.add(ethernetBoards[ethernetType].eth_power);
+    if (ethernetBoards[ethernetType].eth_mdc>=0)       pins.add(ethernetBoards[ethernetType].eth_mdc);
+    if (ethernetBoards[ethernetType].eth_mdio>=0)      pins.add(ethernetBoards[ethernetType].eth_mdio);
+    switch (ethernetBoards[ethernetType].eth_clk_mode) {
+      case ETH_CLOCK_GPIO0_IN:
+      case ETH_CLOCK_GPIO0_OUT:
+        pins.add(0);
+        break;
+      case ETH_CLOCK_GPIO16_OUT:
+        pins.add(16);
+        break;
+      case ETH_CLOCK_GPIO17_OUT:
+        pins.add(17);
+        break;
+    }
+  }
+    */
+}
+
+
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum ApBehaviourEnum {
+    /// Open AP when no connection after boot
+    ApBehaviorBootNoConn = 0,
+    /// Open when no connection (either after boot or if connection is lost)
+    ApBehaviorNoConn = 1,
+    /// Always open
+    ApBehaviorAlways = 2,
+    /// Only when button pressed for 6 sec
+    ApBehaviorButtonOnly = 3,
+}
 
