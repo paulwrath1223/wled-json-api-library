@@ -1,5 +1,6 @@
 use serde;
 use serde::{Serialize, Deserialize};
+use crate::errors::WledJsonApiError;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -66,6 +67,23 @@ pub struct State {
     pub seg: Vec<Seg>,
 }
 
+
+impl TryInto<String> for &State{
+    type Error = WledJsonApiError;
+    fn try_into(self) -> Result<String, WledJsonApiError> {
+        serde_json::to_string(self).map_err(|e| {WledJsonApiError::SerdeError(e)})
+    }
+}
+
+impl TryFrom<&str> for State{
+    type Error = WledJsonApiError;
+    fn try_from(str_in: &str) -> Result<State, WledJsonApiError> {
+        serde_json::from_str(str_in).map_err(|e| {WledJsonApiError::SerdeError(e)})
+    }
+}
+
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Nl {
@@ -90,6 +108,14 @@ pub struct Nl {
     pub rem: i16,
 }
 
+impl TryInto<String> for Nl{
+    type Error = WledJsonApiError;
+    fn try_into(self) -> Result<String, WledJsonApiError> {
+        wrap_and_str(self)
+    }
+}
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Udpn {
@@ -109,6 +135,13 @@ pub struct Udpn {
     /// Don't send a broadcast packet (applies to just the current API call). Not included in state response.
     #[serde(default)]
     pub nn: bool,
+}
+
+impl TryInto<String> for Udpn{
+    type Error = WledJsonApiError;
+    fn try_into(self) -> Result<String, WledJsonApiError> {
+        wrap_and_str(self)
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -219,15 +252,36 @@ pub struct Playlist {
     pub end: u8,
 }
 
+impl TryInto<String> for Playlist{
+    type Error = WledJsonApiError;
+    fn try_into(self) -> Result<String, WledJsonApiError> {
+        wrap_and_str(self)
+    }
+}
+
+fn wrap_and_str<T>(serde_guy: T) -> Result<String, WledJsonApiError>
+where T: serde::Serialize
+{
+    let mut out: String = String::from("\"state\": {");
+    out.push_str(&*serde_json::to_string(&serde_guy).map_err(|e| { WledJsonApiError::SerdeError(e) })?);
+    out.push('}');
+    Ok(out)
+}
+
+
 #[cfg(test)]
 mod tests {
-    use serde_json;
-    use crate::state::State;
+    use crate::structures::state::State;
 
     #[test]
     fn it_works() {
-        let a: State = serde_json::from_str(r#"{"on":true,"bri":128,"transition":7,"ps":-1,"pl":-1,"nl":{"on":false,"dur":60,"mode":1,"tbri":0,"rem":-1},"udpn":{"send":false,"recv":true,"sgrp":1,"rgrp":1},"lor":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":6,"len":6,"grp":1,"spc":0,"of":0,"on":true,"frz":false,"bri":255,"cct":127,"set":0,"col":[[255,160,0],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":true,"rev":false,"mi":false,"o1":false,"o2":false,"o3":false,"si":0,"m12":0}]}"#).unwrap();
-        println!("{:?}", a);
+        let s = r#"{"on":true,"bri":128,"transition":7,"ps":-1,"pl":-1,"nl":{"on":false,"dur":60,"mode":1,"tbri":0,"rem":-1},"udpn":{"send":false,"recv":true,"sgrp":1,"rgrp":1},"lor":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":6,"len":6,"grp":1,"spc":0,"of":0,"on":true,"frz":false,"bri":255,"cct":127,"set":0,"col":[[255,160,0],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":true,"rev":false,"mi":false,"o1":false,"o2":false,"o3":false,"si":0,"m12":0}]}"#;
+        println!("og string: {:?}", s);
+        let a: State = State::try_from(s).unwrap();
+        println!("State object: {:?}", a);
+        let b: String = a.try_into().unwrap();
+        println!("converted object: {:?}", b);
+
 
     }
 }

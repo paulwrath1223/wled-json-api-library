@@ -1,5 +1,10 @@
-mod state;
-mod info;
+
+mod errors;
+mod wled;
+mod structures;
+
+
+use errors::WledJsonApiError;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

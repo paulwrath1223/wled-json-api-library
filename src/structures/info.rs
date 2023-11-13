@@ -1,5 +1,6 @@
 use serde;
 use serde::{Serialize, Deserialize};
+use crate::errors::WledJsonApiError;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -97,6 +98,13 @@ pub struct Info {
     pub ip: String,
 }
 
+impl TryFrom<&str> for Info{
+    type Error = WledJsonApiError;
+    fn try_from(str_in: &str) -> Result<Info, WledJsonApiError> {
+        serde_json::from_str(str_in).map_err(|e| {WledJsonApiError::SerdeError(e)})
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Leds {
@@ -173,12 +181,11 @@ pub struct Fs {
 
 #[cfg(test)]
 mod tests {
-    use serde_json;
-    use crate::info::Info;
+    use crate::structures::info::Info;
 
     #[test]
     fn it_works() {
-        let a: Info = serde_json::from_str(r#"{"ver":"0.14.0","vid":2310130,"leds":{"count":6,"pwr":0,"fps":5,"maxpwr":0,"maxseg":32,"seglc":[1],"lc":1,"rgbw":false,"wv":0,"cct":0},"str":false,"name":"WLED","udpport":21324,"live":false,"liveseg":-1,"lm":"","lip":"","ws":0,"fxcount":187,"palcount":71,"cpalcount":0,"maps":[{"id":0}],"wifi":{"bssid":"FC:EC:DA:A4:C4:77","rssi":-60,"signal":80,"channel":1},"fs":{"u":12,"t":983,"pmt":0},"ndc":0,"arch":"esp32","core":"v3.3.6-16-gcc5440f6a2","lwip":0,"freeheap":200300,"uptime":6,"time":"1970-1-1, 00:00:06","opt":79,"brand":"WLED","product":"FOSS","mac":"a842e38d9828","ip":"192.168.1.40"}"#).unwrap();
+        let a: Info = Info::try_from(r#"{"ver":"0.14.0","vid":2310130,"leds":{"count":6,"pwr":0,"fps":5,"maxpwr":0,"maxseg":32,"seglc":[1],"lc":1,"rgbw":false,"wv":0,"cct":0},"str":false,"name":"WLED","udpport":21324,"live":false,"liveseg":-1,"lm":"","lip":"","ws":0,"fxcount":187,"palcount":71,"cpalcount":0,"maps":[{"id":0}],"wifi":{"bssid":"FC:EC:DA:A4:C4:77","rssi":-60,"signal":80,"channel":1},"fs":{"u":12,"t":983,"pmt":0},"ndc":0,"arch":"esp32","core":"v3.3.6-16-gcc5440f6a2","lwip":0,"freeheap":200300,"uptime":6,"time":"1970-1-1, 00:00:06","opt":79,"brand":"WLED","product":"FOSS","mac":"a842e38d9828","ip":"192.168.1.40"}"#).unwrap();
         println!("{:?}", a);
     }
 }
