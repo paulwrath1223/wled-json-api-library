@@ -1,10 +1,10 @@
 use serde;
 use serde::{Serialize, Deserialize};
-use serde_json::Value;
+use crate::errors::WledJsonApiError;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Root {
+pub struct Cfg {
     pub rev: Vec<i64>,
     pub vid: i64,
     pub id: Id,
@@ -22,6 +22,15 @@ pub struct Root {
     pub ota: Ota,
     pub um: Um,
 }
+
+
+impl TryFrom<&str> for Cfg{
+    type Error = WledJsonApiError;
+    fn try_from(str_in: &str) -> Result<Cfg, WledJsonApiError> {
+        serde_json::from_str(str_in).map_err(|e| {WledJsonApiError::SerdeError(e)})
+    }
+}
+
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -68,7 +77,7 @@ pub struct Wifi {
 #[serde(rename_all = "camelCase")]
 pub struct Hw {
     pub led: Led,
-    pub com: Vec<Value>,
+    pub com: Vec<ColorOrderMap>,
     pub btn: Btn,
     pub ir: Ir,
     pub relay: Relay,
@@ -362,13 +371,13 @@ pub struct Ol {
 #[serde(rename_all = "camelCase")]
 pub struct Timers {
     pub cntdwn: Cntdwn,
-    pub ins: Vec<Value>,
+    pub ins: Vec<Ins>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cntdwn {
-    pub goal: Vec<i64>,
+    pub goal: Goal,
     #[serde(rename = "macro")]
     pub macro_field: i64,
 }
@@ -387,3 +396,52 @@ pub struct Ota {
 #[serde(rename_all = "camelCase")]
 pub struct Um {
 }
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ColorOrderMap {
+    pub start: u16,
+    pub stop: u16,
+    pub order: u8,
+
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Goal {
+    #[serde(rename = "0")]
+    pub year: u8,
+    #[serde(rename = "1")]
+    pub month: u8,
+    #[serde(rename = "2")]
+    pub day: u8,
+    #[serde(rename = "3")]
+    pub hour: u8,
+    #[serde(rename = "4")]
+    pub minute: u8,
+    #[serde(rename = "5")]
+    pub second: u8,
+}
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Ins {
+    pub en: bool,
+    pub hour: u8,
+    pub min: i8,
+    #[serde(rename = "macro")]
+    pub macro_field: u8,
+    pub start: MonthDay,
+    pub end: MonthDay,
+}
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MonthDay {
+    pub mon: u8,
+    pub day: u8,
+}
+
+

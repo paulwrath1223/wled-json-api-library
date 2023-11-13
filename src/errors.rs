@@ -10,4 +10,6 @@ pub enum WledJsonApiError {
     UnableToAddPortToURL,
     #[error("Server responded with HTTP code {0}")]
     HttpError(reqwest::StatusCode),
+    #[error("Attempted to flush with nothing in internal buffer. either set it through the public data member, or get from the server and (presumably) change something")]
+    FlushNone,
 }

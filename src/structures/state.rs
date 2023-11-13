@@ -16,15 +16,17 @@ pub struct State {
     pub transition: u8,
 
     /// Similar to transition, but applies to just the current API call. Not included in state response.
-    #[serde(default)]
-    pub tt: u8,
+    #[serde(default = "none_function")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tt: Option<u8>,
 
     /// -1 to 65535; ID of currently set preset. 1~17~ can be used to iterate through presets 1-17.
     pub ps: i32,
 
     /// 1 to 16 (250 in 0.11); Save current light config to specified preset slot. Not included in state response.
-    #[serde(default)]
-    pub psave: u8,
+    #[serde(default = "none_function")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub psave: Option<u8>,
 
     /// -1 to 0; 	ID of currently set playlist. For now, this sets the preset cycle feature, -1 is off and 0 is on.
     pub pl: i8,
@@ -147,8 +149,8 @@ impl TryInto<String> for Udpn{
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Seg {
-    /// 0 to info.maxseg -1; Zero-indexed ID of the segment. May be omitted, in that case the ID will be inferred from the order of the segment objects in the seg array.
-    pub id: u8,
+    /// -1 to info.maxseg -1; Zero-indexed ID of the segment. May be omitted, in that case the ID will be inferred from the order of the segment objects in the seg array. -1 means apply to all selected segments
+    pub id: i16,
 
     /// 0 to info.leds.count -1; LED the segment starts at.
     pub start: u16,
@@ -230,7 +232,7 @@ pub struct Seg {
     pub si: u8,
 
     /// 0 to 4 [map1D2D.count]; Setting of segment field 'Expand 1D FX'. (0: Pixels, 1: Bar, 2: Arc, 3: Corner)
-    pub m12: i64,
+    pub m12: u8,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -268,6 +270,10 @@ where T: serde::Serialize
     Ok(out)
 }
 
+pub fn none_function<T>() -> Option<T>{
+    None
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -277,7 +283,7 @@ mod tests {
     fn it_works() {
         let s = r#"{"on":true,"bri":128,"transition":7,"ps":-1,"pl":-1,"nl":{"on":false,"dur":60,"mode":1,"tbri":0,"rem":-1},"udpn":{"send":false,"recv":true,"sgrp":1,"rgrp":1},"lor":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":6,"len":6,"grp":1,"spc":0,"of":0,"on":true,"frz":false,"bri":255,"cct":127,"set":0,"col":[[255,160,0],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":true,"rev":false,"mi":false,"o1":false,"o2":false,"o3":false,"si":0,"m12":0}]}"#;
         println!("og string: {:?}", s);
-        let a: State = State::try_from(s).unwrap();
+        let a: &State = &State::try_from(s).unwrap();
         println!("State object: {:?}", a);
         let b: String = a.try_into().unwrap();
         println!("converted object: {:?}", b);

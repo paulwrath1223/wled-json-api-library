@@ -7,31 +7,26 @@ use crate::structures::palettes::Palettes;
 use crate::structures::state::State;
 use reqwest;
 use reqwest::{Client, Url};
+use crate::structures::cfg::Cfg;
+use crate::structures::live::Live;
+use crate::structures::net::Net;
+use crate::structures::nodes::Nodes;
 
 struct Wled {
-    effects: Effects,
-    palettes: Palettes,
-    state: State,
-    info: Info,
+    pub effects: Option<Effects>,
+    pub palettes: Option<Palettes>,
+    pub state: Option<State>,
+    pub info: Option<Info>,
+    pub cfg: Option<Cfg>,
+    pub live: Option<Live>,
+    pub nodes: Option<Nodes>,
+    pub net: Option<Net>,
     pub client: Client, // should probably be private in most cases, but fuck you
     pub url: Url,
-    pub outgoing_state: State,
-
 }
 
 impl Wled{
-    pub fn get_local_effects(&self) -> &Effects {
-        &self.effects
-    }
-    pub fn get_local_palettes(&self) -> &Palettes {
-        &self.palettes
-    }
-    pub fn get_local_state(&self) -> &State {
-        &self.state
-    }
-    pub fn get_local_info(&self) -> &Info {
-        &self.info
-    }
+
 
     pub async fn try_from_url(url: &mut Url) -> Result<Wled, WledJsonApiError> {
         let temp_client: Client = reqwest::ClientBuilder::new()
@@ -49,13 +44,16 @@ impl Wled{
 
 
                 Ok(Wled{
-                    effects: Default::default(),
-                    palettes: Default::default(),
-                    state: Default::default(),
-                    info: Default::default(),
-                    client: Default::default(),
+                    effects: None,
+                    palettes: None,
+                    state: None,
+                    info: None,
+                    cfg: None,
+                    live: None,
+                    nodes: None,
+                    net: None,
+                    client: temp_client,
                     url: temp_url,
-                    outgoing_state: Default::default(),
                 })
             }
             Ok(o) => {Err(WledJsonApiError::HttpError(o.status()))}
@@ -65,15 +63,108 @@ impl Wled{
 
     pub async fn flush_state(&self) -> Result<(), WledJsonApiError> {
 
+        match &self.state{
+            Some(s) => {
+                let packet: String = s.try_into()?;
 
-        let packet: String = (&self.state).try_into()?;
+                let mut temp_url = self.url.clone();
+                temp_url.set_path("json/state");
 
+                self.client.post(temp_url).body(packet).send()
+                    .await?;
+
+                Ok(())
+            }
+            None => Err(WledJsonApiError::FlushNone)
+        }
+    }
+
+    pub async fn get_effects_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/eff");
+        self.effects = Some(Effects::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
+
+    pub async fn get_state_from_wled(&mut self) -> Result<(), WledJsonApiError> {
         let mut temp_url = self.url.clone();
         temp_url.set_path("json/state");
+        self.state = Some(State::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
+    pub async fn get_cfg_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/cfg");
+        self.cfg = Some(Cfg::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
+    pub async fn get_net_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/net");
+        self.net = Some(Net::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
 
-        self.client.post(temp_url).body(packet).send()
-            .await?;
+    pub async fn get_nodes_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/nodes");
+        self.nodes = Some(Nodes::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
 
+    pub async fn get_palettes_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/pal");
+        self.palettes = Some(Palettes::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
+        Ok(())
+    }
+
+    pub async fn get_live_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/live");
+        self.live = Some(Live::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send().await?
+                .text().await?
+        )?);
         Ok(())
     }
 
