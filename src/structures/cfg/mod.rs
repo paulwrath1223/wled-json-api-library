@@ -5,6 +5,15 @@ use crate::errors::WledJsonApiError;
 use crate::structures::none_function;
 
 
+
+pub mod cfg_id;
+pub mod cfg_nw;
+pub mod cfg_ap;
+pub mod cfg_eth;
+pub mod cfg_wifi;
+pub mod cfg_hw;
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cfg {
