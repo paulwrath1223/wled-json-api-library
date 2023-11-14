@@ -1,3 +1,11 @@
+use serde;
+use serde::{Serialize, Deserialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use crate::errors::WledJsonApiError;
+use crate::structures::none_function;
+
+
+
 
 /// Hardware info
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -14,17 +22,17 @@ pub struct Hw {
     #[serde(default = "none_function")]
     pub com: Option<Vec<ColorOrderMap>>,
 
-    ///
+    /// Info about connected buttons
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub btn: Option<Btn>,
 
-    ///
+    /// info about IR receiver
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub ir: Option<Ir>,
 
-    ///
+    /// info about relay
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub relay: Option<Relay>,
@@ -287,4 +295,238 @@ pub struct Matrix {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub panels: Option<Vec<Panel>>,
+}
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct If {
+    /// [i2c_sda pin, i2c_scl pin]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "i2c-pin")]
+    pub i2c_pin: Option<[i8; 2]>,
+
+    /// [spi_mosi pin, spi_sclk pin, spi_miso pin]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "spi-pin")]
+    pub spi_pin: Option<[i8; 3]>,
+}
+
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Panel {
+    /// starts at bottom?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub b: Option<bool>,
+
+    /// starts on right?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub r: Option<bool>,
+
+    /// is vertical?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub v: Option<bool>,
+
+    /// is serpentine?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub s: Option<bool>,
+
+    /// x offset relative to the top left of matrix in LEDs
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub x: Option<u16>,
+
+    /// y offset relative to the top left of matrix in LEDs
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub y: Option<u16>,
+
+    /// height of the panel
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub h: Option<u8>,
+
+    /// width of the panel
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub w: Option<u8>,
+
+}
+
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct In3 {
+
+    /// Button type
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "type")]
+    pub type_field: Option<ButtonType>,
+
+    /// Button pin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pin: Option<Vec<i8>>,
+
+    /// Button macros
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub macros: Option<ButtonMacros>,
+}
+
+
+
+/// Various types
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum ButtonType {
+    /// None
+    BTN_TYPE_NONE,
+    /// Reserved
+    BTN_TYPE_RESERVED,
+    /// Push button that is considered "pushed" when at logic low
+    BTN_TYPE_PUSH,
+    /// Push button that is considered "pushed" when at logic high
+    BTN_TYPE_PUSH_ACT_HIGH,
+    /// A switch with no defined on or off
+    BTN_TYPE_SWITCH,
+    /// PIR sensor
+    BTN_TYPE_PIR_SENSOR,
+    /// Touch sensor (presumably using the built in touch sensor of the ESP32)
+    BTN_TYPE_TOUCH,
+    /// Not really a button, but there you go
+    BTN_TYPE_ANALOG,
+    /// BTN_TYPE_ANALOG, but inverted
+    BTN_TYPE_ANALOG_INVERTED,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD1,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD2,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD3,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD4,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD5,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD6,
+
+}
+
+
+
+///     Light capability byte (unused) 0bRCCCTTTT
+///     bits 0/1/2/3: specifies a type of LED driver. A single "driver" may have different chip models but must have the same protocol/behavior
+///     bits 4/5/6: specifies the class of LED driver - 0b000 (dec. 0-15)  unconfigured/reserved
+///                                                   - 0b001 (dec. 16-31) digital (data pin only)
+///                                                   - 0b010 (dec. 32-47) analog (PWM)
+///                                                   - 0b011 (dec. 48-63) digital (data + clock / SPI)
+///                                                   - 0b100 (dec. 64-79) unused/reserved
+///                                                   - 0b101 (dec. 80-95) virtual network busses
+///                                                   - 0b110 (dec. 96-111) unused/reserved
+///                                                   - 0b111 (dec. 112-127) unused/reserved
+///     bit 7 is reserved and set to 0
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum LightCapability {
+    /// light is not configured
+    TYPE_NONE = 0,
+    ///unused. Might indicate a "virtual"
+    TYPE_RESERVED = 1,
+
+    //Digital types (data pin only) (16-31)
+
+    ///white-only chips (1 channel per IC) (unused)
+    TYPE_WS2812_1CH = 18,
+    ///white-only chips (3 channels per IC)
+    TYPE_WS2812_1CH_X3 = 19,
+    ///CCT chips (1st IC controls WW + CW of 1st zone and CW of 2nd zone, 2nd IC controls WW of 2nd zone and WW + CW of 3rd zone)
+    TYPE_WS2812_2CH_X3 = 20,
+    ///amber + warm + cold white
+    TYPE_WS2812_WWA = 21,
+
+    TYPE_WS2812_RGB = 22,
+    ///same driver as WS2812, but will require signal 2x per second (else displays test pattern)
+    TYPE_GS8608 = 23,
+    ///half-speed WS2812 protocol, used by very old WS2811 units
+    TYPE_WS2811_400KHZ = 24,
+
+    TYPE_TM1829 = 25,
+
+    TYPE_UCS8903 = 26,
+
+    TYPE_UCS8904 = 29,
+
+    TYPE_SK6812_RGBW = 30,
+
+    TYPE_TM1814 = 31,
+
+    //"Analog" types (PWM) (32-47)
+
+    ///binary output (relays etc.)
+    TYPE_ONOFF = 40,
+    ///single channel PWM. Uses value of brightest RGBW channel
+    TYPE_ANALOG_1CH = 41,
+    ///analog WW + CW
+    TYPE_ANALOG_2CH = 42,
+    ///analog RGB
+    TYPE_ANALOG_3CH = 43,
+    ///analog RGBW
+    TYPE_ANALOG_4CH = 44,
+    ///analog RGB + WW
+    TYPE_ANALOG_5CH = 45,
+
+    // Digital types (data + clock / SPI) (48-63)
+
+
+    TYPE_WS2801 = 50,
+
+    TYPE_APA102 = 51,
+
+    TYPE_LPD8806 = 52,
+
+    TYPE_P9813 = 53,
+
+    TYPE_LPD6803 = 54,
+
+    //Network types (master broadcast) (80-95)
+
+    ///network DDP RGB bus (master broadcast bus)
+    TYPE_NET_DDP_RGB = 80,
+    ///network E131 RGB bus (master broadcast bus, unused)
+    TYPE_NET_E131_RGB = 81,
+    ///network ArtNet RGB bus (master broadcast bus, unused)
+    TYPE_NET_ARTNET_RGB = 82,
+    ///network DDP RGBW bus (master broadcast bus)
+    TYPE_NET_DDP_RGBW = 88,
+
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD1,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD2,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD3,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD4,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD5,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD6,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD7,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more ethernet types
+    RSVD8,
+
 }

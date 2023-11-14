@@ -1,3 +1,10 @@
+use serde;
+use serde::{Serialize, Deserialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use crate::errors::WledJsonApiError;
+use crate::structures::none_function;
+
+
 
 
 /// Information about the access point that the ESP hosts when enabled, or when connecting to other AP fails

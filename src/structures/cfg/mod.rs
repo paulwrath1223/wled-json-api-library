@@ -2,6 +2,13 @@ use serde;
 use serde::{Serialize, Deserialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::errors::WledJsonApiError;
+use crate::structures::cfg::cfg_ap::Ap;
+use crate::structures::cfg::cfg_eth::Eth;
+use crate::structures::cfg::cfg_hw::Hw;
+use crate::structures::cfg::cfg_id::Id;
+use crate::structures::cfg::cfg_light::Light;
+use crate::structures::cfg::cfg_nw::Nw;
+use crate::structures::cfg::cfg_wifi::Wifi;
 use crate::structures::none_function;
 
 
@@ -12,6 +19,7 @@ pub mod cfg_ap;
 pub mod cfg_eth;
 pub mod cfg_wifi;
 pub mod cfg_hw;
+pub mod cfg_light;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
