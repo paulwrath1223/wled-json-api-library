@@ -185,10 +185,10 @@ pub struct Hw {
     #[serde(default = "none_function")]
     pub relay: Option<Relay>,
 
-    ///
+    /// baud rate/100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub baud: Option<i64>,
+    pub baud: Option<u16>,
 
     ///
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -358,75 +358,168 @@ pub struct In3 {
     #[serde(default = "none_function")]
     pub pin: Option<Vec<i8>>,
 
-    /// frequency?? IG?
+    /// Button macros
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub macros: Option<Vec<i64>>,
+    pub macros: Option<ButtonMacros>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ir {
-    pub pin: i64,
+
+    /// Pin for this sensor. presumably fucking explodes if negative
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pin: Option<i8>,
+
+    /// IR type 0 is disabled, go scour the undocumented WLED source code for the rest
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "type")]
-    pub type_field: i64,
-    pub sel: bool,
+    pub type_field: Option<u8>,
+
+    /// apply IR to all selected segments; who knows what happens when false
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sel: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Relay {
-    pub pin: i64,
-    pub rev: bool,
+    /// pin for the relay
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pin: Option<i8>,
+
+    /// negate output
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rev: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct If {
+    /// [i2c_sda pin, i2c_scl pin]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "i2c-pin")]
-    pub i2c_pin: Vec<i64>,
+    pub i2c_pin: Option<[i8; 2]>,
+
+    /// [spi_mosi pin, spi_sclk pin, spi_miso pin]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "spi-pin")]
-    pub spi_pin: Vec<i64>,
+    pub spi_pin: Option<[i8; 3]>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Light {
+    /// % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "scale-bri")]
-    pub scale_bri: i64,
+    pub scale_bri: Option<u8>,
+
+    /// paletteBlend: 0 - wrap when moving, 1 - always wrap, 2 - never wrap, 3 - none (undefined)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "pal-mode")]
-    pub pal_mode: i64,
-    pub aseg: bool,
-    pub gc: Gc,
-    pub tr: Tr,
-    pub nl: Nl,
+    pub pal_mode: Option<u8>,
+
+    /// If true, a segment per bus will be created on boot and LED settings save.
+    /// If false, only one segment spanning the total LEDs is created,
+    /// but not on LED settings save if there is more than one segment currently
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub aseg: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub gc: Option<Gc>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub tr: Option<Tr>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub nl: Option<Nl>,
 }
 
+/// gamma correction shit, tired of documenting speghetti
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Gc {
-    pub bri: i64,
-    pub col: f64,
-    pub val: f64,
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub bri: Option<f64>,
+
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub col: Option<f64>,
+
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub val: Option<f64>,
 }
 
+/// transition stuff, tired of documenting speghetti
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tr {
-    pub mode: bool,
-    pub dur: i64,
-    pub pal: i64,
-    pub rpc: i64,
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mode: Option<bool>,
+
+    /// default transition time / 100
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub dur: Option<u16>,
+
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pal: Option<u8>,
+
+    /// amount of time [s] between random palette changes (min: 1s, max: 255s)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rpc: Option<u8>,
 }
 
+/// night light stuff, tired of documenting speghetti
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Nl {
-    pub mode: i64,
-    pub dur: i64,
-    pub tbri: i64,
+
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mode: Option<NightLightMode>,
+
+    /// see struct documentation
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub dur: Option<u8>,
+
+    /// brightness after nightlight is over
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub tbri: Option<u8>,
+
+    /// after nightlight delay over
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "macro")]
-    pub macro_field: i64,
+    pub macro_field: Option<u8>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -666,6 +759,29 @@ pub struct Goal {
     pub second: u8,
 }
 
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ButtonMacros {
+    /// preset to apply when button is pressed once, or default behaviour if 0.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "0")]
+    pub macro_button: Option<u8>,
+
+    /// preset to apply when button is pressed for a long time, or default behaviour if 0.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "1")]
+    pub macro_long_press: Option<u8>,
+
+    /// preset to apply when button is pressed twice, or default behaviour if 0.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "2")]
+    pub macro_double_press: Option<u8>,
+
+}
+
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -787,19 +903,58 @@ pub enum ApBehaviourEnum {
 
 }
 
+/// Modes for night light
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum NightLightMode {
+    /// After nightlight time elapsed, set to target brightness
+    NL_MODE_SET,
+    /// Fade to target brightness gradually
+    NL_MODE_FADE,
+    /// Fade to target brightness and secondary color gradually
+    NL_MODE_COLORFADE,
+    /// Sunrise/sunset. Target brightness is set immediately, then Sunrise effect is started. Max 60 min.
+    NL_MODE_SUN,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD1,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD2,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD3,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD4,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD5,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
+    RSVD6,
+
+}
+
+
 /// Various types
 #[allow(non_camel_case_types)]
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 pub enum ButtonType {
-    /// Open AP when no connection after boot
-    ApBehaviorBootNoConn,
-    /// Open when no connection (either after boot or if connection is lost)
-    ApBehaviorNoConn,
-    /// Always open
-    ApBehaviorAlways,
-    /// Only when button pressed for 6 sec
-    ApBehaviorButtonOnly,
+    /// None
+    BTN_TYPE_NONE,
+    /// Reserved
+    BTN_TYPE_RESERVED,
+    /// Push button that is considered "pushed" when at logic low
+    BTN_TYPE_PUSH,
+    /// Push button that is considered "pushed" when at logic high
+    BTN_TYPE_PUSH_ACT_HIGH,
+    /// A switch with no defined on or off
+    BTN_TYPE_SWITCH,
+    /// PIR sensor
+    BTN_TYPE_PIR_SENSOR,
+    /// Touch sensor (presumably using the built in touch sensor of the ESP32)
+    BTN_TYPE_TOUCH,
+    /// Not really a button, but there you go
+    BTN_TYPE_ANALOG,
+    /// BTN_TYPE_ANALOG, but inverted
+    BTN_TYPE_ANALOG_INVERTED,
     /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
     RSVD1,
     /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours

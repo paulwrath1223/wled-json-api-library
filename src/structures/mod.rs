@@ -7,6 +7,7 @@ pub mod state_info;
 pub mod nodes;
 pub mod net;
 pub mod live;
+mod cfg;
 
 pub fn none_function<T>() -> Option<T>{
     None

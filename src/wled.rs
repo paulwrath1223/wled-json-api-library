@@ -42,7 +42,6 @@ impl Wled{
             Ok(a) if a.status() == reqwest::StatusCode::OK => {
                 url.set_port(Some(4048)).map_err(|_| {WledJsonApiError::UnableToAddPortToURL})?;
 
-
                 Ok(Wled{
                     effects: None,
                     palettes: None,
@@ -104,6 +103,7 @@ impl Wled{
         )?);
         Ok(())
     }
+
     pub async fn get_cfg_from_wled(&mut self) -> Result<(), WledJsonApiError> {
         let mut temp_url = self.url.clone();
         temp_url.set_path("json/cfg");
@@ -116,6 +116,7 @@ impl Wled{
         )?);
         Ok(())
     }
+
     pub async fn get_net_from_wled(&mut self) -> Result<(), WledJsonApiError> {
         let mut temp_url = self.url.clone();
         temp_url.set_path("json/net");
@@ -167,5 +168,4 @@ impl Wled{
         )?);
         Ok(())
     }
-
 }
