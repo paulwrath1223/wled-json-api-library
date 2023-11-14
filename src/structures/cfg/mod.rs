@@ -1,8 +1,8 @@
 use serde;
 use serde::{Serialize, Deserialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::errors::WledJsonApiError;
 use crate::structures::cfg::cfg_ap::Ap;
+use crate::structures::cfg::cfg_def::Def;
 use crate::structures::cfg::cfg_eth::Eth;
 use crate::structures::cfg::cfg_hw::Hw;
 use crate::structures::cfg::cfg_id::Id;
@@ -20,6 +20,9 @@ pub mod cfg_eth;
 pub mod cfg_wifi;
 pub mod cfg_hw;
 pub mod cfg_light;
+mod cfg_def;
+mod cfg_if2;
+mod cfg_remote;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -40,19 +43,55 @@ pub struct Cfg {
     #[serde(default = "none_function")]
     pub id: Option<Id>,
 
-    pub nw: Nw,
-    pub eth: Eth,
-    pub ap: Ap,
-    pub wifi: Wifi,
-    pub hw: Hw,
-    pub light: Light,
-    pub def: Def,
+    /// client mode network info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub nw: Option<Nw>,
+
+    /// ethernet info, not included in builds with use Ethernet build flag
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub eth: Option<Eth>,
+
+    /// Access point info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ap: Option<Ap>,
+
+    /// literally just "sleep" whatever the fuck it meansa
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub wifi: Option<Wifi>,
+
+    /// hardware info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub hw: Option<Hw>,
+
+    /// light info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub light: Option<Light>,
+
+    /// defaults
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub def: Option<Def>,
+
+    /// identifying information
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "if")]
     pub if_field: If2,
+    
     pub remote: Remote,
+
     pub ol: Ol,
+
     pub timers: Timers,
+
     pub ota: Ota,
+
     pub um: Um,
 }
 
