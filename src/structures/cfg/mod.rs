@@ -6,8 +6,10 @@ use crate::structures::cfg::cfg_def::Def;
 use crate::structures::cfg::cfg_eth::Eth;
 use crate::structures::cfg::cfg_hw::Hw;
 use crate::structures::cfg::cfg_id::Id;
+use crate::structures::cfg::cfg_if2::If2;
 use crate::structures::cfg::cfg_light::Light;
 use crate::structures::cfg::cfg_nw::Nw;
+use crate::structures::cfg::cfg_remote::Remote;
 use crate::structures::cfg::cfg_wifi::Wifi;
 use crate::structures::none_function;
 
@@ -23,6 +25,7 @@ pub mod cfg_light;
 mod cfg_def;
 mod cfg_if2;
 mod cfg_remote;
+mod cfg_ol;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -78,20 +81,35 @@ pub struct Cfg {
     #[serde(default = "none_function")]
     pub def: Option<Def>,
 
-    /// identifying information
+    /// Iterface info
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     #[serde(rename = "if")]
-    pub if_field: If2,
-    
-    pub remote: Remote,
+    pub if_field: Option<If2>,
 
+    /// Remote info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub remote: Option<Remote>,
+
+    /// Iterface info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub ol: Ol,
 
+    /// Iterface info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub timers: Timers,
 
+    /// Iterface info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub ota: Ota,
 
+    /// Iterface info
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     pub um: Um,
 }
 

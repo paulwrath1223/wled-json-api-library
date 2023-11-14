@@ -305,78 +305,78 @@ pub struct Hue {
     #[serde(default = "none_function")]
     pub id: Option<u8>,
 
-    /// second MQTT topic (for example to group devices)
+    /// (low values (< 1sec) may cause lag but offer quicker response) / 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub iv: i64,
+    pub iv: Option<u16>,
 
-    /// second MQTT topic (for example to group devices)
+    /// hue receiver info
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub recv: Recv2,
+    pub recv: Option<Recv2>,
 
-    /// second MQTT topic (for example to group devices)
+    /// hue IP
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ip: Vec<i64>,
+    pub ip: Option<[u8; 4]>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Recv2 {
-    /// second MQTT topic (for example to group devices)
+    /// hue Apply On Off
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub on: bool,
+    pub on: Option<bool>,
 
-    /// second MQTT topic (for example to group devices)
+    /// hue Apply Bri
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub bri: bool,
+    pub bri: Option<bool>,
 
-    /// second MQTT topic (for example to group devices)
+    /// hue Apply Color
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub col: bool,
+    pub col: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ntp {
-    /// second MQTT topic (for example to group devices)
+    /// get internet time. Only required if you use clock overlays or time-activated macros
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub en: bool,
+    pub en: Option<bool>,
 
-    /// second MQTT topic (for example to group devices)
+    /// NTP server to use
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub host: String,
+    pub host: Option<String>,
 
-    /// second MQTT topic (for example to group devices)
+    /// Timezone ID. Refer to timezones array in wled10_ntp.ino
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub tz: i64,
+    pub tz: Option<TimeZoneId>,
 
-    /// second MQTT topic (for example to group devices)
+    /// Seconds to offset from UTC before timzone calculation
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub offset: i64,
+    pub offset: Option<u32>,
 
-    /// second MQTT topic (for example to group devices)
+    /// Use AM/PM;  12h/24h clock format
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ampm: bool,
+    pub ampm: Option<bool>,
 
-    /// second MQTT topic (for example to group devices)
+    /// longitude
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ln: i64,
+    pub ln: Option<f64>,
 
-    /// second MQTT topic (for example to group devices)
+    /// latitude
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub lt: i64,
+    pub lt: Option<f64>,
 }
 
 
@@ -420,4 +420,41 @@ pub enum DmxMode {
     /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more Night Light modes
     RSVD6,
 
+}
+
+/// Time zone IDs
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum TimeZoneId {
+    TZ_UTC,
+    TZ_UK,
+    TZ_EUROPE_CENTRAL,
+    TZ_EUROPE_EASTERN,
+    TZ_US_EASTERN,
+    TZ_US_CENTRAL,
+    TZ_US_MOUNTAIN,
+    TZ_US_ARIZONA,
+    TZ_US_PACIFIC,
+    TZ_CHINA,
+    TZ_JAPAN,
+    TZ_AUSTRALIA_EASTERN,
+    TZ_NEW_ZEALAND,
+    TZ_NORTH_KOREA,
+    TZ_INDIA,
+    TZ_SASKACHEWAN,
+    TZ_AUSTRALIA_NORTHERN,
+    TZ_AUSTRALIA_SOUTHERN,
+    TZ_HAWAII,
+    TZ_NOVOSIBIRSK,
+    TZ_ANCHORAGE,
+    TZ_MX_CENTRAL,
+    TZ_PAKISTAN,
+    TZ_RSVD1,
+    TZ_RSVD2,
+    TZ_RSVD3,
+    TZ_RSVD4,
+    TZ_RSVD5,
+    TZ_RSVD6,
+    TZ_INIT = 255
 }
