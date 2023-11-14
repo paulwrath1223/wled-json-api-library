@@ -165,7 +165,7 @@ pub struct Hw {
     #[serde(default = "none_function")]
     pub led: Option<Led>,
 
-    ///
+    /// List of color order maps
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub com: Option<Vec<ColorOrderMap>>,
@@ -316,20 +316,52 @@ pub struct In2 {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Btn {
-    pub max: i64,
-    pub pull: bool,
-    pub ins: Vec<In3>,
-    pub tt: i64,
-    pub mqtt: bool,
+
+    /// just information about max number of buttons (not actually used)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub max: Option<u8>,
+
+    /// idfk
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pull: Option<bool>,
+
+    /// balls, testicles
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ins: Option<Vec<In3>>,
+
+    /// Touch threshold
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub tt: Option<u8>,
+
+    /// button Publish Mqtt
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mqtt: Option<bool>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct In3 {
+
+    /// Button type
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
     #[serde(rename = "type")]
-    pub type_field: i64,
-    pub pin: Vec<i64>,
-    pub macros: Vec<i64>,
+    pub type_field: Option<ButtonType>,
+
+    /// Button pin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pin: Option<Vec<i8>>,
+
+    /// frequency?? IG?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub macros: Option<Vec<i64>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -595,10 +627,26 @@ pub struct Um {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ColorOrderMap {
-    pub start: u16,
-    pub stop: u16,
-    pub order: u8,
 
+    /// Probably the start index?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub start: Option<u16>,
+
+    /// stop index? probably?, could not find in latest source, but its in the WLED 14.0 binary
+    #[serde(skip_serializing)]
+    #[serde(default = "none_function")]
+    pub stop: Option<u16>,
+
+    /// length ig?
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub len: Option<u16>,
+
+    /// Whatever the fuck 'order' is
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub order: Option<u8>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -716,6 +764,34 @@ pub struct Panel {
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 pub enum ApBehaviourEnum {
+    /// Open AP when no connection after boot
+    ApBehaviorBootNoConn,
+    /// Open when no connection (either after boot or if connection is lost)
+    ApBehaviorNoConn,
+    /// Always open
+    ApBehaviorAlways,
+    /// Only when button pressed for 6 sec
+    ApBehaviorButtonOnly,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD1,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD2,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD3,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD4,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD5,
+    /// Reserved to keep some semblance of backwards compatibility when new WLED versions come out with more AP behaviours
+    RSVD6,
+
+}
+
+/// Various types
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum ButtonType {
     /// Open AP when no connection after boot
     ApBehaviorBootNoConn,
     /// Open when no connection (either after boot or if connection is lost)
