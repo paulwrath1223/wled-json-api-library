@@ -43,7 +43,7 @@ pub struct Hw {
     #[serde(default = "none_function")]
     pub baud: Option<u16>,
 
-    ///
+    /// interface info
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     #[serde(rename = "if")]

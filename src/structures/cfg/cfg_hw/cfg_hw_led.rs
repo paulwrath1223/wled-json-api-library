@@ -60,13 +60,13 @@ pub struct Led {
     /// WLED busses
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ins: Option<Vec<In2>>,
+    pub ins: Option<Vec<PhysicalWledBusInfo>>,
 }
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct In2 {
+pub struct PhysicalWledBusInfo {
 
     /// start ig?
     #[serde(skip_serializing_if = "Option::is_none")]

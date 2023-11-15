@@ -12,4 +12,7 @@ pub enum WledJsonApiError {
     HttpError(reqwest::StatusCode),
     #[error("Attempted to flush with nothing in internal buffer. either set it through the public data member, or get from the server and (presumably) change something")]
     FlushNone,
+    #[error("Attempted to read a key that doesn't exist \
+            (either you need to read it from the server, or the server didn't send one)")]
+    MissingKey,
 }
