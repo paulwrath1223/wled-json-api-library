@@ -214,7 +214,7 @@ pub enum LightCapability {
     TYPE_WS2812_2CH_X3 = 20,
     ///amber + warm + cold white
     TYPE_WS2812_WWA = 21,
-
+    /// the 'default config' shared by newer WS281X chips.
     TYPE_WS2812_RGB = 22,
     ///same driver as WS2812, but will require signal 2x per second (else displays test pattern)
     TYPE_GS8608 = 23,
