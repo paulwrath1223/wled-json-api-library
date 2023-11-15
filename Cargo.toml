@@ -6,7 +6,8 @@ license = "MIT"
 keywords = ["protocol", "json", "pixel", "wled", "api"]
 categories = ["network-programming", "api-bindings"]
 description = "WLED Json API in rust. Made with WLED ~14.0, but should work for more"
-repository = "https://github.com/paulwrath1223/WLED-Streamer"
+repository = "https://github.com/paulwrath1223/wled-json-api-library"
+
 
 [dependencies]
 serde = { version = "1.0.192", features = ["derive"] }
