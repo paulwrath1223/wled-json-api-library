@@ -3,6 +3,7 @@ use serde::{Serialize, Deserialize};
 use crate::structures::none_function;
 
 
+/// anolog clock stuff?
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Ol {

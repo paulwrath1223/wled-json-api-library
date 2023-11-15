@@ -183,7 +183,7 @@ pub struct Info {
     #[serde(default = "none_function")]
     pub time: Option<String>,
 
-    /// Used for debugging purposes only. bit map of os info
+    /// Used for debugging purposes only. bit map of build info
     ///     #ifdef WLED_DEBUG_HOST
     ///         os |= 0x0100;
     ///         if (!netDebugEnabled) os &= ~0x0080;
@@ -330,7 +330,7 @@ pub struct Map {
     #[serde(default = "none_function")]
     pub id: Option<u8>,
 
-    /// Led map name. only included in builds for hardware with sufficient power
+    /// Led map name. only included in builds for hardware with sufficient processing power
     /// (currently just everything but the esp8266)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]

@@ -234,9 +234,12 @@ pub struct Seg {
     pub cct: Option<u16>,
 
     /// Undocumented?????? TODO
+    ///
+    /// // 14-15 : 0-3 UI segment sets/groups
+    ///     -WLED source
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub set: Option<i64>,
+    pub set: Option<u8>,
 
     /// Array that has up to 3 color arrays as elements, the primary, secondary (background) and tertiary colors of the segment. Each color is an array of 3 or 4 bytes, which represent an RGB(W) color.
     #[serde(skip_serializing_if = "Option::is_none")]
