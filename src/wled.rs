@@ -1,16 +1,17 @@
+use std::time::Duration;
 
-use std::time::{Duration, Instant};
-use crate::errors::WledJsonApiError;
-use crate::structures::effects::Effects;
-use crate::structures::info::Info;
-use crate::structures::palettes::Palettes;
-use crate::structures::state::State;
 use reqwest;
 use reqwest::{Client, Url};
+
+use crate::errors::WledJsonApiError;
 use crate::structures::cfg::Cfg;
+use crate::structures::effects::Effects;
+use crate::structures::info::Info;
 use crate::structures::live::Live;
 use crate::structures::net::Net;
 use crate::structures::nodes::Nodes;
+use crate::structures::palettes::Palettes;
+use crate::structures::state::State;
 
 struct Wled {
     pub effects: Option<Effects>,

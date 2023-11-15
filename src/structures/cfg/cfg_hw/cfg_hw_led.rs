@@ -184,7 +184,7 @@ pub struct Panel {
 
 
 
-///     Light capability byte (unused) 0bRCCCTTTT
+///     Light capability byte 0bRCCCTTTT
 ///     bits 0/1/2/3: specifies a type of LED driver. A single "driver" may have different chip models but must have the same protocol/behavior
 ///     bits 4/5/6: specifies the class of LED driver - 0b000 (dec. 0-15)  unconfigured/reserved
 ///                                                   - 0b001 (dec. 16-31) digital (data pin only)

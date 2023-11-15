@@ -3,41 +3,39 @@ use serde::{Serialize, Deserialize};
 use crate::structures::none_function;
 
 
-
+/// only included in some WLED builds
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Nw {
-    /// honestly no idea why this is a vector, WLED source only uses one element
+pub struct Dmx {
+    /// number of channels per fixture
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ins: Option<Vec<In>>,
-}
+    pub chan: Option<u8>,
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct In {
-    /// SSID of the network to connect to
+    /// assigns the different channels to different functions. See wled21_dmx.ino for more information.
+    /// gap between the fixtures. makes addressing easier because you don't have to memorize odd numbers when climbing up onto a rig.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ssid: Option<String>,
+    pub gap: Option<u16>,
 
-    /// Length of the wifi password
+    /// start address of the first fixture
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub pskl: Option<usize>,
+    pub start: Option<u16>,
 
-    /// static IP of ESP
+    /// LED from which DMX fixtures start
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ip: Option<[u8; 4]>,
+    #[serde(rename = "start-led")]
+    pub start_led: Option<u16>,
 
-    /// gateway (router) IP
+    /// fixture map
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub gw: Option<[u8; 4]>,
+    pub fixmap: Option<[u8; 16]>,
 
-    /// most common subnet in home networks is 255:255:255:0
+    /// output this E1.31 (sACN) / ArtNet universe via MAX485 (0 = disabled)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub sn: Option<[u8; 4]>,
+    pub e131proxy: Option<u16>,
 }

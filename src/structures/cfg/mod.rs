@@ -3,15 +3,20 @@ use serde::{Serialize, Deserialize};
 use crate::errors::WledJsonApiError;
 use crate::structures::cfg::cfg_ap::Ap;
 use crate::structures::cfg::cfg_def::Def;
+use crate::structures::cfg::cfg_dmx::Dmx;
 use crate::structures::cfg::cfg_eth::Eth;
 use crate::structures::cfg::cfg_hw::Hw;
 use crate::structures::cfg::cfg_id::Id;
 use crate::structures::cfg::cfg_if2::If2;
 use crate::structures::cfg::cfg_light::Light;
 use crate::structures::cfg::cfg_nw::Nw;
+use crate::structures::cfg::cfg_ol::Ol;
+use crate::structures::cfg::cfg_ota::Ota;
 use crate::structures::cfg::cfg_remote::Remote;
+use crate::structures::cfg::cfg_timers::Timers;
 use crate::structures::cfg::cfg_wifi::Wifi;
 use crate::structures::none_function;
+
 
 
 
@@ -26,12 +31,15 @@ mod cfg_def;
 mod cfg_if2;
 mod cfg_remote;
 mod cfg_ol;
+mod cfg_timers;
+mod cfg_ota;
+mod cfg_dmx;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cfg {
-    /// Version of WLED ("1.0.2", for example is [1, 0, 2])
+    /// Version of WLED ("1.0.2", for example is [1, 0, 2]) but WLED source only uses 2 indices :/
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub rev: Option<Vec<u32>>,
@@ -92,25 +100,30 @@ pub struct Cfg {
     #[serde(default = "none_function")]
     pub remote: Option<Remote>,
 
-    /// Iterface info
+    /// Analog clock stuff
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ol: Ol,
+    pub ol: Option<Ol>,
 
-    /// Iterface info
+    /// timer settings
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub timers: Timers,
+    pub timers: Option<Timers>,
 
-    /// Iterface info
+    /// Over the air update settings
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub ota: Ota,
+    pub ota: Option<Ota>,
 
-    /// Iterface info
+    /// Dmx setting. build-dependant
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub um: Um,
+    pub dmx: Option<Dmx>,
+
+    /// usermod settings. this depends on the mod, so I wont even touch this.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub um: Option<serde_json::Value>,
 }
 
 
@@ -118,5 +131,12 @@ impl TryFrom<&str> for Cfg{
     type Error = WledJsonApiError;
     fn try_from(str_in: &str) -> Result<Cfg, WledJsonApiError> {
         serde_json::from_str(str_in).map_err(|e| {WledJsonApiError::SerdeError(e)})
+    }
+}
+
+impl TryInto<String> for &Cfg{
+    type Error = WledJsonApiError;
+    fn try_into(self) -> Result<String, WledJsonApiError> {
+        serde_json::to_string(self).map_err(|e| {WledJsonApiError::SerdeError(e)})
     }
 }

@@ -170,7 +170,6 @@ pub struct Ir {
 }
 
 
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct If {
@@ -186,8 +185,6 @@ pub struct If {
     #[serde(rename = "spi-pin")]
     pub spi_pin: Option<[i8; 3]>,
 }
-
-
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

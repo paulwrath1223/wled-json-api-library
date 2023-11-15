@@ -4,27 +4,27 @@ use crate::structures::none_function;
 
 
 
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Id {
-    ///mDNS address (*.local, replaced by wledXXXXXX if default is used)
+pub struct Ota {
+    /// prevents OTA firmware updates without password. ALWAYS enable if system exposed to any public networks
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub mdns: Option<String>,
+    pub lock: Option<bool>,
 
-    /// Server Description; Name of module - use default
+    /// prevents access to WiFi settings when OTA lock is enabled
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub name: Option<String>,
+    #[serde(rename = "lock-wifi")]
+    pub lock_wifi: Option<bool>,
 
-    /// Alexa invocation name; speech control name of device. Choose something voice-to-text can understand
+    /// length of OTA password
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub inv: Option<String>,
+    pub pskl: Option<u8>,
 
-    /// Simplified UI;
+    /// ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub sui: Option<bool>,
+    pub aota: Option<bool>,
 }

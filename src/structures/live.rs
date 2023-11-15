@@ -1,13 +1,23 @@
 use serde;
 use serde::{Serialize, Deserialize};
 use crate::errors::WledJsonApiError;
+use crate::structures::none_function;
 
 
+
+/// Not Done, broken, dont use
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Live {
-    pub leds: Vec<String>,
-    pub n: i64,
+    /// Not Done, broken, dont use
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub leds: Option<Vec<String>>,
+
+    /// Not Done, broken, dont use
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub n: Option<i64>,
 }
 
 impl TryFrom<&str> for Live{

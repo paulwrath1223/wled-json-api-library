@@ -1,7 +1,6 @@
 use serde;
 use serde::{Serialize, Deserialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use crate::errors::WledJsonApiError;
 use crate::structures::none_function;
 
 
@@ -9,13 +8,27 @@ use crate::structures::none_function;
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct If2 {
-    pub sync: Sync,
-    pub nodes: Nodes,
-    pub live: Live,
-    pub va: Va,
-    pub mqtt: Mqtt,
-    pub hue: Hue,
-    pub ntp: Ntp,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sync: Option<Sync>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub nodes: Option<Nodes>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub live: Option<Live>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub va: Option<Va>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mqtt: Option<Mqtt>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub hue: Option<Hue>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ntp: Option<Ntp>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -157,7 +170,7 @@ pub struct Live {
     /// DMX info
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub dmx: Option<Dmx>,
+    pub dmx: Option<LiveDmx>,
 
     /// (ms timeout of realtime mode before returning to normal mode) / 100
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -181,10 +194,12 @@ pub struct Live {
     pub offset: Option<u32>,
 }
 
+
+/// Dmx setting found in 'cfg. ...live.dmx', not the root 'cfg.dmx'
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Dmx {
-    /// settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consequtive universes)
+pub struct LiveDmx {
+    /// settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consecutive universes)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub uni: Option<u16>,

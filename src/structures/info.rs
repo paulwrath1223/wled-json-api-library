@@ -1,101 +1,236 @@
 use serde;
 use serde::{Serialize, Deserialize};
 use crate::errors::WledJsonApiError;
+use crate::structures::cfg::cfg_hw::cfg_hw_led::LightCapability;
+use crate::structures::none_function;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Info {
     /// Version name.
-    pub ver: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ver: Option<String>,
 
     /// Build ID (YYMMDDB, B = daily build index).
-    pub vid: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub vid: Option<u32>,
 
     /// Contains info about the LED setup.
-    pub leds: Leds,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub leds: Option<Leds>,
 
-    /// If true, an UI with only a single button for toggling sync should toggle receive+send, otherwise send only
-    pub str: bool,
+    /// sync Toggle Receive
+    /// UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub str: Option<bool>,
 
     /// Friendly name of the light. Intended for display in lists and titles.
-    pub name: String,
+    /// Name of module - default is WLED
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub name: Option<String>,
 
     /// The UDP port for realtime packets and WLED broadcast.
-    pub udpport: u16,
+    /// WLED notifier default port
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub udpport: Option<u16>,
 
     /// If true, the software is currently receiving realtime data via UDP or E1.31.
-    pub live: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub live: Option<bool>,
 
-    /// undocumented??? TODO
-    pub liveseg: i64,
+    /// main segment id if its active, -1 otherwise
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub liveseg: Option<u8>,
 
     /// Info about the realtime data source
-    pub lm: String,
+    /// WLED SOURCE (as of ~wled 14.0:
+    ///   switch (realtimeMode) {
+    ///     case REALTIME_MODE_INACTIVE: root["lm"] = ""; break;
+    ///     case REALTIME_MODE_GENERIC:  root["lm"] = ""; break;
+    ///     case REALTIME_MODE_UDP:      root["lm"] = F("UDP"); break;
+    ///     case REALTIME_MODE_HYPERION: root["lm"] = F("Hyperion"); break;
+    ///     case REALTIME_MODE_E131:     root["lm"] = F("E1.31"); break;
+    ///     case REALTIME_MODE_ADALIGHT: root["lm"] = F("USB Adalight/TPM2"); break;
+    ///     case REALTIME_MODE_ARTNET:   root["lm"] = F("Art-Net"); break;
+    ///     case REALTIME_MODE_TPM2NET:  root["lm"] = F("tpm2.net"); break;
+    ///     case REALTIME_MODE_DDP:      root["lm"] = F("DDP"); break;
+    ///   }
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub lm: Option<String>,
 
     /// Realtime data source IP address
-    pub lip: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub lip: Option<String>,
 
     /// -1 to 8; Number of currently connected WebSockets clients. -1 indicates that WS is unsupported in this build.
-    pub ws: i8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ws: Option<i8>,
 
     /// Number of effects included.
-    pub fxcount: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub fxcount: Option<u8>,
 
     /// Number of palettes configured.
-    pub palcount: u16,
+    /// will only return built-in palette count
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub palcount: Option<u16>,
 
-    /// undocumented??? TODO
-    pub cpalcount: i64,
+    /// custom palette count
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub cpalcount: Option<u16>,
 
-    /// undocumented??? TODO
-    pub maps: Vec<Map>,
+    /// available ledmaps
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub maps: Option<Vec<Map>>,
 
-    /// Info about current signal strength
-    pub wifi: Wifi,
+    /// Info about wifi
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub wifi: Option<Wifi>,
 
     /// Info about the embedded LittleFS filesystem (since 0.11.0)
-    pub fs: Fs,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub fs: Option<Fs>,
 
     /// -1 to 255; Number of other WLED devices discovered on the network. -1 if Node discovery disabled. (since 0.12.0)
-    pub ndc: i16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ndc: Option<i16>,
+
+    /// only present on debug builds
+    /// (int) WiFi.getTxPower();
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "txPower")]
+    pub tx_power: Option<u32>,
+
+    /// only present on debug builds
+    /// (bool) WiFi.getSleep();
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub sleep: Option<bool>,
 
     /// Name of the platform.
-    pub arch: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub arch: Option<String>,
 
     /// Version of the underlying (Arduino core) SDK.
-    pub core: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub core: Option<String>,
+
+    /// only present on debug esp32 builds
+    /// (int)rtc_get_reset_reason(0);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "resetReason0")]
+    pub reset_reason_0: Option<u32>,
+
+    /// only present on debug esp32 builds
+    /// (int)rtc_get_reset_reason(1);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "resetReason1")]
+    pub reset_reason_1: Option<u32>,
+
+    /// only present on debug esp8266 builds
+    /// (int)rtc_get_reset_reason(0);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "resetReason")]
+    pub reset_reason: Option<u32>,
 
     /// 0-2; Version of LwIP. 1 or 2 on ESP8266, 0 (does not apply) on ESP32. Deprecated, removal in 0.14.0
-    pub lwip: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub lwip: Option<u8>,
 
     /// Bytes of heap memory (RAM) currently available. Problematic if <10k.
-    pub freeheap: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub freeheap: Option<u32>,
+
+    /// ESP.getFreePsram(); only present when hardware supports psram
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub psram: Option<u64>,
 
     /// Time since the last boot/reset in seconds.
-    pub uptime: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub uptime: Option<u32>,
 
-    /// undocumented??? TODO
-    pub time: String,
+    /// The current time in human readable format
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub time: Option<String>,
 
-    /// Used for debugging purposes only.
-    pub opt: u16,
+    /// Used for debugging purposes only. bit map of os info
+    ///     #ifdef WLED_DEBUG_HOST
+    ///         os |= 0x0100;
+    ///         if (!netDebugEnabled) os &= ~0x0080;
+    ///     #endif
+    /// 0x80: debug enabled
+    /// 0x40: disable alexa
+    /// 0x20: Depreceated, used to be Blynk support, may be repurposed
+    /// 0x10: usermod Chronixie
+    /// 0x08: disable filesystem build tag
+    /// 0x04: disable hue sync build tag
+    /// 0x02: enable AdaLight build tag
+    /// 0x01: disable OTA build tag
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub opt: Option<u16>,
 
     /// The producer/vendor of the light. Always WLED for standard installations.
-    pub brand: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub brand: Option<String>,
 
     /// The product name. Always FOSS for standard installations.
-    pub product: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub product: Option<String>,
 
-    /// The origin of the build. src if a release version is compiled from source, bin for an official release image, dev for a development build (regardless of src/bin origin) and exp for experimental versions. ogn if the image is flashed to hardware by the vendor. Removed as of v0.10
-    #[serde(default)]
-    pub btype: String,
+    /// The origin of the build.
+    /// src if a release version is compiled from source,
+    /// bin for an official release image,
+    /// dev for a development build (regardless of src/bin origin)
+    /// and exp for experimental versions.
+    /// ogn if the image is flashed to hardware by the vendor.
+    /// Removed as of v0.10
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub btype: Option<String>,
 
     /// The hexadecimal hardware MAC address of the light, lowercase and without colons.
-    pub mac: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub mac: Option<String>,
 
     /// The IP address of this instance. Empty string if not connected. (since 0.13.0)
-    pub ip: String,
+    /// format: sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub ip: Option<String>,
 }
 
 impl TryFrom<&str> for Info{
@@ -109,74 +244,162 @@ impl TryFrom<&str> for Info{
 #[serde(rename_all = "camelCase")]
 pub struct Leds {
     /// 1 to 1200; Total LED count.
-    pub count: u16,
+    /// will include virtual/nonexistent pixels in matrix
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub count: Option<u16>,
 
-    /// 0 to 65000; Current LED power usage in milliamps as determined by the ABL. 0 if ABL is disabled.
-    pub pwr: u16,
+    /// 0 to 65000; Current LED power usage in milliamps as determined by the ABL.
+    /// (0 if ABL is disabled.)<-maybe
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pwr: Option<u16>,
 
-    /// Current frames per second. (available since 0.12.0)
-    pub fps: u8,
+    /// Returns the refresh rate of the LED strip.
+    /// Useful for finding out whether a given setup is fast enough.
+    /// Only updates on show() or is set to 0 fps if last show is more than 2 secs ago,
+    /// so accuracy varies
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub fps: Option<u16>,
 
     /// 0 to 65000; Maximum power budget in milliamps for the ABL. 0 if ABL is disabled.
-    pub maxpwr: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub maxpwr: Option<u16>,
 
     /// Maximum number of segments supported by this version.
-    pub maxseg: u8,
+    /// returns maximum number of supported segments (fixed value)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub maxseg: Option<u8>,
+
+    /// Dimensions of matrix; not included in all builds
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub matrix: Option<MatrixDims>,
 
     /// Per-segment virtual light capabilities
-    pub seglc: Vec<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub seglc: Option<Vec<LightCapability>>,
 
     /// Logical AND of all active segment's virtual light capabilities
-    pub lc: u8,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub lc: Option<u8>,
 
     /// true if LEDs are 4-channel (RGB + White). (deprecated, use info.leds.lc)
-    pub rgbw: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rgbw: Option<bool>,
 
     /// WLED WIKI SAYS BOOL??? true if a white channel slider should be displayed. (available since 0.10.0, deprecated, use info.leds.lc)
-    pub wv: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub wv: Option<u8>,
 
     /// WLED WIKI SAYS BOOL??? true if the light supports color temperature control (available since 0.13.0, deprecated, use info.leds.lc)
-    pub cct: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub cct: Option<u8>,
 
     /// LED strip pin(s). Always one element. Removed as of v0.13
-    #[serde(default)]
-    pub pin: Vec<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pin: Option<Vec<i8>>,
+
+    /// [i2c_sda pin, i2c_scl pin];
+    /// only in debug builds
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub i2c: Option<[i8; 2]>,
+
+    /// [spi_mosi pin, spi_sclk pin, spi_miso pin];
+    /// only in debug builds
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub spi: Option<[i8; 3]>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Map {
-    /// undocumented??? TODO
-    pub id: i64,
+    /// index of an avilable led map
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub id: Option<u8>,
+
+    /// Led map name. only included in builds for hardware with sufficient power
+    /// (currently just everything but the esp8266)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub n: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Wifi {
-    /// The BSSID of the currently connected network.
-    pub bssid: String,
+    /// Return the current bssid / mac associated with the network if configured
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub bssid: Option<String>,
 
-    /// undocumented??? (rssi is an oversimplified measure of signal strength, just use signal)TODO
-    pub rssi: i64,
+    /// undocumented??? heres the WLED source as of WLED ~14.0:
+    /// int qrssi = WiFi.RSSI(); <- thats an i8
+    ///   wifi_info[F("rssi")] = qrssi; <- but thats a u32
+    ///   wifi_info[F("signal")] = getSignalQuality(qrssi);
+    /// I'm going to make RSSI an i64 to include both in case this gets fixed in the future.
+    /// blame me for 4 bytes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub rssi: Option<i64>,
 
     /// 0-100; Relative signal quality of the current connection.
-    pub signal: u8,
+    /// use this over RSSI unless for some reason you feel cooler doing the conversion in your head
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub signal: Option<u8>,
 
-    /// 1 to 14; The current WiFi channel.
-    pub channel: u8,
+    /// 1 to 14; The current WiFi channel. WLED source uses i32 so i will too
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub channel: Option<i32>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Fs {
     /// Estimate of used filesystem space in kilobytes
-    pub u: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub u: Option<u32>,
 
     /// Total filesystem size in kilobytes
-    pub t: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub t: Option<u32>,
 
-    /// Unix timestamp for the last modification to the presets.json file. Not accurate after boot or after using /edit
-    pub pmt: u32,
+    /// Unix timestamp for the last modification to the presets.json file.
+    /// Not accurate after boot or after using /edit
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub pmt: Option<u64>,
+}
+
+///these define matrix width & height (max. segment dimensions)
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MatrixDims {
+    /// max width
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub w: Option<u16>,
+
+    /// max height
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    pub h: Option<u16>,
 }
 
 #[cfg(test)]
