@@ -27,13 +27,13 @@ pub mod cfg_eth;
 pub mod cfg_wifi;
 pub mod cfg_hw;
 pub mod cfg_light;
-mod cfg_def;
-mod cfg_if2;
-mod cfg_remote;
-mod cfg_ol;
-mod cfg_timers;
-mod cfg_ota;
-mod cfg_dmx;
+pub mod cfg_def;
+pub mod cfg_if2;
+pub mod cfg_remote;
+pub mod cfg_ol;
+pub mod cfg_timers;
+pub mod cfg_ota;
+pub mod cfg_dmx;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

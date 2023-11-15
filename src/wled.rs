@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use reqwest;
-use reqwest::blocking::{Client, ClientBuilder};
+use reqwest::blocking::{Client, ClientBuilder, Response};
 use reqwest::Url;
 
 use crate::errors::WledJsonApiError;
@@ -70,7 +70,7 @@ impl Wled{
     }
 
 
-    pub fn flush_state(&self) -> Result<(), WledJsonApiError> {
+    pub fn flush_state(&self) -> Result<Response, WledJsonApiError> {
 
         match &self.state{
             Some(s) => {
@@ -79,17 +79,16 @@ impl Wled{
                 let mut temp_url = self.url.clone();
                 temp_url.set_path("json/state");
 
-                self.client.post(temp_url).body(packet).send()?;
-
-                Ok(())
+                Ok(self.client.post(temp_url).body(packet).send()?)
             }
             None => Err(WledJsonApiError::FlushNone)
         }
     }
 
 
-    /// DONT KNOW IF WLED ALLOWS THIS
-    pub fn flush_config(&self) -> Result<(), WledJsonApiError> {
+    /// be careful with this, this library does not stop you from sending invalid and crazy configs.
+    /// as long as the feilds make sense it should work, but
+    pub fn flush_config(&self) -> Result<Response, WledJsonApiError> {
 
         match &self.cfg{
             Some(s) => {
@@ -98,9 +97,7 @@ impl Wled{
                 let mut temp_url = self.url.clone();
                 temp_url.set_path("json/cfg");
 
-                self.client.post(temp_url).body(packet).send()?;
-
-                Ok(())
+                Ok(self.client.post(temp_url).body(packet).send()?)
             }
             None => Err(WledJsonApiError::FlushNone)
         }
@@ -201,6 +198,7 @@ impl Wled{
 
 #[cfg(test)]
 mod tests {
+    use crate::structures::cfg::cfg_def::Def;
     use super::*;
 
     #[test]
@@ -210,9 +208,80 @@ mod tests {
 
         println!("new wled: {wled:?}");
 
+
+        // put the desired change in the internal state data member
+        wled.state = Some(State{
+            on: Some(false),
+            bri: None,
+            transition: None,
+            tt: None,
+            ps: None,
+            psave: None,
+            pl: None,
+            nl: None,
+            udpn: None,
+            v: None,
+            rb: None,
+            live: None,
+            lor: None,
+            time: None,
+            mainseg: None,
+            playlist: None,
+            seg: None,
+        });
+
+        // flush
+        let response = wled.flush_state().unwrap();
+        println!("turning the thing off {:?}", response.text());
+
+
+        // fill internal cfg with result from WLED
         wled.get_cfg_from_wled().unwrap();
 
+        // get the feild defining the power on boot default behaviour
+        let config = wled.cfg.clone();
+        let turn_on_after_boot = config.unwrap().def.unwrap().on.unwrap();
+        // print it
+        println!("received cfg, turn on after boot: {:?}", turn_on_after_boot);
 
-        println!("received cfg: {:?}", wled.cfg);
+
+
+
+        wled.cfg = Some(Cfg{
+            rev: None,
+            vid: None,
+            id: None,
+            nw: None,
+            eth: None,
+            ap: None,
+            wifi: None,
+            hw: None,
+            light: None,
+            def: Some(Def{
+                ps: None,
+                on: Some(!turn_on_after_boot),
+                bri: None,
+            }),
+            if_field: None,
+            remote: None,
+            ol: None,
+            timers: None,
+            ota: None,
+            dmx: None,
+            um: None,
+        });
+
+        let response = wled.flush_config().unwrap();
+
+        println!("toggling: {:?}", response.text());
+
+
+        wled.get_cfg_from_wled().unwrap();
+
+        let config = wled.cfg.clone();
+
+        let turn_on_after_boot = config.unwrap().def.unwrap().on.unwrap();
+
+        println!("received cfg, turn on after boot: {:?}", turn_on_after_boot);
     }
 }

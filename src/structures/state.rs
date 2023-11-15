@@ -144,13 +144,6 @@ pub struct Nl {
     pub rem: Option<i16>,
 }
 
-impl TryInto<String> for Nl{
-    type Error = WledJsonApiError;
-    fn try_into(self) -> Result<String, WledJsonApiError> {
-        wrap_and_str(self)
-    }
-}
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -180,13 +173,6 @@ pub struct Udpn {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub nn: Option<bool>,
-}
-
-impl TryInto<String> for Udpn{
-    type Error = WledJsonApiError;
-    fn try_into(self) -> Result<String, WledJsonApiError> {
-        wrap_and_str(self)
-    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -333,6 +319,9 @@ pub struct Seg {
     pub m12: Option<u8>,
 }
 
+
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Playlist {
@@ -361,24 +350,6 @@ pub struct Playlist {
     #[serde(default = "none_function")]
     pub end: Option<u8>,
 }
-
-impl TryInto<String> for Playlist{
-    type Error = WledJsonApiError;
-    fn try_into(self) -> Result<String, WledJsonApiError> {
-        wrap_and_str(self)
-    }
-}
-
-fn wrap_and_str<T>(serde_guy: T) -> Result<String, WledJsonApiError>
-where T: serde::Serialize
-{
-    let mut out: String = String::from("\"state\": {");
-    out.push_str(&*serde_json::to_string(&serde_guy).map_err(|e| { WledJsonApiError::SerdeError(e) })?);
-    out.push('}');
-    Ok(out)
-}
-
-
 
 
 #[cfg(test)]
