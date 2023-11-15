@@ -116,6 +116,19 @@ impl Wled{
         Ok(())
     }
 
+    pub fn get_info_from_wled(&mut self) -> Result<(), WledJsonApiError> {
+        let mut temp_url = self.url.clone();
+        temp_url.set_path("json/info");
+        self.info = Some(Info::try_from(
+            &*self.client
+                .get(temp_url)
+                .header(reqwest::header::ACCEPT, "application/json")
+                .send()?
+                .text()?
+        )?);
+        Ok(())
+    }
+
     pub fn get_state_from_wled(&mut self) -> Result<(), WledJsonApiError> {
         let mut temp_url = self.url.clone();
         temp_url.set_path("json/state");
