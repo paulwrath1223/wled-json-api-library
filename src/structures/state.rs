@@ -241,6 +241,13 @@ pub struct Seg {
     #[serde(default = "none_function")]
     pub set: Option<u8>,
 
+    /// The name of the segment. Names are not present by default.
+    /// if this is none, use "Segment{id}" to match the WLED UI
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default = "none_function")]
+    #[serde(rename = "n")]
+    pub name: Option<String>,
+
     /// Array that has up to 3 color arrays as elements, the primary, secondary (background) and tertiary colors of the segment. Each color is an array of 3 or 4 bytes, which represent an RGB(W) color.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
