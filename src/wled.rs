@@ -254,53 +254,12 @@ mod tests {
 
         // fill internal cfg with result from WLED
         wled.get_cfg_from_wled().unwrap();
-
-        // get the field defining the power on boot default behaviour
-        let turn_on_after_boot = wled.cfg.unwrap().def.unwrap().on.unwrap();
-        // print it
-        println!("received cfg, turn on after boot: {:?}", turn_on_after_boot);
-
-
-        // put the desired change into the config data member
-        wled.cfg = Some(Cfg{
-            rev: None,
-            vid: None,
-            id: None,
-            nw: None,
-            eth: None,
-            ap: None,
-            wifi: None,
-            hw: None,
-            light: None,
-            def: Some(Def{
-                ps: None,
-                on: Some(!turn_on_after_boot),
-                bri: None,
-            }),
-            if_field: None,
-            remote: None,
-            ol: None,
-            timers: None,
-            ota: None,
-            dmx: None,
-            um: None,
-        });
-
-        // print the response.
-        let response = wled.flush_config().unwrap();
-        println!("toggling: {:?}", response.text());
-
-        // wait for WLED to finish making this change.
-        // Around 100 milliseconds should be enough on good hardware,
-        // but this is especially slow because it has to read and write from the internal filesystem
-        // where the config file is stored
-        std::thread::sleep(Duration::from_millis(80));
-
-
-        // get and print the new state from the server
-        wled.get_cfg_from_wled().unwrap();
-        let turn_on_after_boot = wled.cfg.unwrap().def.unwrap().on.unwrap();
-
-        println!("received cfg, turn on after boot: {:?}", turn_on_after_boot);
+        wled.get_effects_from_wled().unwrap();
+        wled.get_live_from_wled().unwrap();
+        wled.get_net_from_wled().unwrap();
+        wled.get_nodes_from_wled().unwrap();
+        wled.get_palettes_from_wled().unwrap();
+        wled.get_state_from_wled().unwrap();
+        wled.get_info_from_wled().unwrap();
     }
 }
