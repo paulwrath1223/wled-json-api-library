@@ -49,7 +49,7 @@ pub struct Info {
     /// main segment id if its active, -1 otherwise
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub liveseg: Option<u8>,
+    pub liveseg: Option<i16>,
 
     /// Info about the realtime data source
     /// WLED SOURCE (as of ~wled 14.0:
