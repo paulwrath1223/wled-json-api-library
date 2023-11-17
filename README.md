@@ -2,7 +2,25 @@
 
 easy way to control WLED with their [JSON API](https://kno.wled.ge/interfaces/json-api/).
 
-This library has a pretty sizable amount of documentation for what each feild means, so even if you are making your own library or can't use Rust, this is the best spot I can find to figure out what various feilds mean. Most are not on the JSON API page, and most of the rest isn't even commented in the WLED source code.
+## Documentation
+This library has a pretty sizable amount of documentation for what each feild means, 
+so even if you are making your own library or can't use Rust, 
+this is the best spot I can find to figure out what various feilds mean.
+Most are not on the JSON API page, and most of the rest isn't even commented in the WLED source code.
+
+If you are the kind soul who wants to put this documentation of the WLED-docs, and can't read rust, here are some pointers:
+
+ - An ```Option``` is an enumeration that can contain a value (```Some(x)```) or nothing (```None```)
+ - Example feild below:
+```rust
+    /// On/Off state of the light                        // The documentation for the feild
+    #[serde(skip_serializing_if = "Option::is_none")]    // Says not to convert to text when sending the root object if it is "None"
+    #[serde(default = "none_function")]                  // Says to set this to None if it can't find this feild in the input text.
+    pub on: Option<bool>,                                // The field. in this case "on" is the key, and the data type is a bool
+// If the field has a line that says "serde(rename = "something")"
+// it is likely because the name of the field in WLED is a reserved rust keyword,
+// so it has to be somthing else and the actual key string is in the "rename" line
+```
 
 ## Compatibility
 I made and tested this with WLED 14.0, but it's meant to support as many builds and past versions as possible. Future versions may or may not be added, but the feilds already present should still work. 
