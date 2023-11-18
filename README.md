@@ -27,7 +27,8 @@ I made and tested this with WLED 14.0, but it's meant to support as many builds 
 
 
 ## Streaming colors
-while there **is** a way to stream colors with the JSON API, it sucks and it slow. If this is something you want to do, use the DDP protocol. [rust ddp protocol library](https://github.com/coral/ddp-rs)
+While there **is** a way to stream colors with the JSON API, it sucks and it slow. If this is something you want to do, use the DDP protocol. [rust ddp protocol library](https://github.com/coral/ddp-rs)
+I decided not to implement this in this library but if you wish to add it, the info on the [WLED documentation](https://kno.wled.ge/interfaces/json-api/#per-segment-individual-led-control) has that feature documented accurately.
 
 
 ## Example
