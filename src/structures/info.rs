@@ -1,5 +1,6 @@
 use serde;
 use serde::{Serialize, Deserialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::errors::WledJsonApiError;
 use crate::structures::cfg::cfg_hw::cfg_hw_led::LightCapability;
 use crate::structures::none_function;
@@ -280,9 +281,13 @@ pub struct Leds {
     pub matrix: Option<MatrixDims>,
 
     /// Per-segment virtual light capabilities
+    ///
+    /// !!! this is a bitmap using the masks found in ```SegmentLightCapability```
+    ///
+    /// !!! Not ```LightCapability```
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
-    pub seglc: Option<Vec<LightCapability>>,
+    pub seglc: Option<Vec<u8>>,
 
     /// Logical AND of all active segment's virtual light capabilities
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -400,6 +405,20 @@ pub struct MatrixDims {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub h: Option<u16>,
+}
+
+
+///     NOT TO BE CONFUSED WITH LightCapability.
+///     this is a bitmap of 3 basic capabilities
+///
+///     I know its confusing. Believe me.
+#[allow(non_camel_case_types)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
+pub enum SegmentLightCapability {
+    SEG_CAPABILITY_RGB = 0x01,
+    SEG_CAPABILITY_W = 0x02,
+    SEG_CAPABILITY_CCT = 0x04,
 }
 
 #[cfg(test)]
