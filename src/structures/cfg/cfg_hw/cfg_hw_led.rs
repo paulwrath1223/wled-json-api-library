@@ -78,7 +78,7 @@ pub struct PhysicalWledBusInfo {
     #[serde(default = "none_function")]
     pub len: Option<u16>,
 
-    /// list of pins for some fucking reason
+    /// list of pins
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub pin: Option<Vec<u8>>,
