@@ -2,7 +2,6 @@ use serde;
 use serde::{Serialize, Deserialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::errors::WledJsonApiError;
-use crate::structures::cfg::cfg_hw::cfg_hw_led::LightCapability;
 use crate::structures::none_function;
 
 
