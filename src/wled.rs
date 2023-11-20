@@ -28,7 +28,6 @@ pub struct Wled {
     pub net: Option<Net>,
     pub client: Client, // should probably be private in most cases, but fuck you
     pub url: Url,
-    pub ddp_url: Url,
 }
 
 impl Wled{
@@ -46,9 +45,6 @@ impl Wled{
             .get(temp_url.clone())
             .send() {
             Ok(a) if a.status() == reqwest::StatusCode::OK => {
-                let temp_url_2 = temp_url.clone();
-                temp_url.set_port(Some(4048)).map_err(|_| {WledJsonApiError::UnableToAddPortToURL})?;
-                temp_url.set_path("");
                 Ok(Wled{
                     effects: None,
                     palettes: None,
@@ -59,8 +55,7 @@ impl Wled{
                     nodes: None,
                     net: None,
                     client: temp_client,
-                    url: temp_url_2,
-                    ddp_url: temp_url
+                    url: temp_url,
                 })
             }
             Ok(o) => {Err(WledJsonApiError::HttpError(o.status()))}
