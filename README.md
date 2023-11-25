@@ -3,7 +3,7 @@
 easy way to control WLED with their [JSON API](https://kno.wled.ge/interfaces/json-api/).
 
 ## Documentation
-This library has a pretty sizable amount of documentation for what each feild means, 
+This library has a pretty sizable amount of documentation for what each field means, 
 so even if you are making your own library or can't use Rust, 
 this is the best spot I can find to figure out what various feilds mean.
 Most are not on the JSON API page, and most of the rest isn't even commented in the WLED source code.
