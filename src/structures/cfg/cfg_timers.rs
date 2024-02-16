@@ -1,6 +1,7 @@
 use serde;
 use serde::{Serialize, Deserialize};
 use crate::structures::none_function;
+use serde_aux_ext::field_attributes::deserialize_option_bool_from_anything;
 
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -56,6 +57,7 @@ pub struct Goal {
 #[serde(rename_all = "camelCase")]
 pub struct Ins {
     /// enabled?
+    #[serde(deserialize_with = "deserialize_option_bool_from_anything")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default = "none_function")]
     pub en: Option<bool>,
